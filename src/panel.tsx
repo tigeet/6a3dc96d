@@ -27,7 +27,9 @@ const CPanel = styled.div.attrs<SProps>((props: SProps) => ({
   display: flex;
   background-size: cover;
   flex-direction: column;
-  padding: 24px;
+  flex-shrink: 0;
+  padding: 36px;
+  justify-content: space-between;
   gap: 16px;
   .title {
     color: white;
@@ -38,5 +40,7 @@ const CPanel = styled.div.attrs<SProps>((props: SProps) => ({
     color: white;
     font-size: 32px;
     word-wrap: break-word;
+    overflow: hidden;
+    white-space: normal;
   }
 `;

@@ -11,6 +11,7 @@ interface CProps {
   width?: number;
   height?: number;
   className?: string;
+  reverse?: boolean;
 }
 
 function Gallery({
@@ -18,33 +19,52 @@ function Gallery({
   panelWidth,
   panelHeight,
   items,
-  gap,
+  gap = 0,
   width,
   height,
-  className,
+  className = "",
+  reverse,
 }: CProps) {
   // time === time for element to cross the screen
-  // panelWidth === width of element and a gap if presented
-  const _width = panelWidth + (gap ?? 0);
+  // _width === width of element and a gap if presented
+  const _width = panelWidth + gap;
   const screenWidth = width ?? window.innerWidth;
-  const offset = -_width * items.length;
-  const duration = Math.ceil((-offset * time) / screenWidth);
 
   const additionalElements = Math.ceil(screenWidth / _width);
-  const _items = [...items, ...items.slice(0, additionalElements)];
+  console.log(additionalElements);
+  let from: number = 0;
+  let to: number = 0;
+  let _items: IPanel[] = [];
+
+  if (reverse) {
+    from = -(items.length + additionalElements) * _width + screenWidth;
+    to = -additionalElements * _width + screenWidth;
+    _items = [
+      ...items.slice(items.length - additionalElements, items.length),
+      ...items,
+    ];
+  } else {
+    from = 0;
+    to = -items.length * _width;
+    _items = [...items, ...items.slice(0, additionalElements)];
+  }
+
+  const duration = Math.ceil((Math.abs(from - to) * time) / 1920);
 
   return (
     <Container
-      className={className ?? ""}
-      offset={offset}
+      className={className}
+      from={from}
+      to={to}
       duration={duration}
-      gap={gap ?? 0}
+      gap={gap}
       width={width}
       height={height}
+      reverse={reverse}
     >
       <div className="content">
-        {_items.map((item) => (
-          <Panel width={panelWidth} height={panelHeight} {...item} />
+        {_items.map((item, i) => (
+          <Panel key={i} width={panelWidth} height={panelHeight} {...item} />
         ))}
       </div>
     </Container>
@@ -53,21 +73,32 @@ function Gallery({
 
 export default Gallery;
 
-const slide = (offset: number) => keyframes`
+const slide = (from: number, to: number) => keyframes`
   0% {
-    left: 0%;
+    left: ${from}px;
   }
   100% {
-    left: ${offset}px
+    left: ${to}px
+  }
+`;
+
+const slideReverse = (from: number, to: number) => keyframes`
+  0% {
+    left: ${from}px;
+  }
+  100% {
+    left: ${to}px
   }
 `;
 
 interface SProps {
-  offset: number;
+  from: number;
+  to: number;
   duration: number;
   gap: number;
   width?: number;
   height?: number;
+  reverse?: boolean;
 }
 const Container = styled.div.attrs(({ width, height }: SProps) => ({
   style: {
@@ -82,7 +113,8 @@ const Container = styled.div.attrs(({ width, height }: SProps) => ({
     left: 0;
     position: relative;
     gap: ${(props) => props.gap}px;
-    animation: ${(props) => slide(props.offset)} ${(props) => props.duration}s
-      linear infinite;
+    animation: ${({ from, to, reverse = false }: SProps) =>
+        reverse ? slideReverse(from, to) : slide(from, to)}
+      ${(props) => props.duration}s linear infinite;
   }
 `;
