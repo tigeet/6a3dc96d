@@ -1,55 +1,77 @@
-import { IPanel } from "App";
-import Panel from "panel";
+import { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
 interface CProps {
-  time: number;
-  panelWidth: number;
-  panelHeight: number;
+  speed: number; // sec per 1920px
   gap?: number;
-  items: IPanel[];
-  width?: number;
+  width?: number; // width of container
   height?: number;
   className?: string;
   reverse?: boolean;
+  children: JSX.Element[];
 }
 
 function Gallery({
-  time,
-  panelWidth,
-  panelHeight,
-  items,
+  speed: time,
   gap = 0,
-  width,
   height,
+  width,
   className = "",
   reverse,
+  children,
 }: CProps) {
-  // time === time for element to cross the screen
-  // _width === width of element and a gap if presented
-  const _width = panelWidth + gap;
+  const [duration, setDuration] = useState<number>(0);
+  const [from, setFrom] = useState<number>(0);
+  const [to, setTo] = useState<number>(0);
+  const [additionalItems, setAdditionalItems] =
+    useState<JSX.Element[]>(children);
+  const refs = useRef<HTMLDivElement[]>(Array(children.length));
   const screenWidth = width ?? window.innerWidth;
+  useEffect(() => {
+    let _from = 0;
+    let _to = 0;
+    const additionalElements = [];
 
-  const additionalElements = Math.ceil(screenWidth / _width);
-  console.log(additionalElements);
-  let from: number = 0;
-  let to: number = 0;
-  let _items: IPanel[] = [];
+    if (reverse) {
+      let addW = 0;
+      for (
+        let i = refs.current.length - 1, w = 0;
+        w < screenWidth;
+        w += refs.current[i].clientWidth + gap, --i
+      ) {
+        additionalElements.push(children[i]);
+        addW += refs.current[i].clientWidth + gap;
+      }
+      additionalElements.reverse();
 
-  if (reverse) {
-    from = -(items.length + additionalElements) * _width + screenWidth;
-    to = -additionalElements * _width + screenWidth;
-    _items = [
-      ...items.slice(items.length - additionalElements, items.length),
-      ...items,
-    ];
-  } else {
-    from = 0;
-    to = -items.length * _width;
-    _items = [...items, ...items.slice(0, additionalElements)];
-  }
+      const _width =
+        refs.current.reduce((w, el) => w + el.clientWidth + gap, 0) + addW;
 
-  const duration = Math.ceil((Math.abs(from - to) * time) / 1920);
+      _from = -_width + screenWidth;
+      _to = -addW + screenWidth;
+    } else {
+      for (
+        let i = 0, w = 0;
+        w < screenWidth;
+        w += refs.current[i].clientWidth + gap, i++
+      ) {
+        additionalElements.push(children[i]);
+      }
+
+      const _width = refs.current.reduce(
+        (w, el) => w + el.clientWidth + gap,
+        0
+      );
+      _from = 0;
+      _to = -_width;
+    }
+
+    const _duration = Math.ceil((Math.abs(_from - _to) * time) / 1920);
+    setDuration(_duration);
+    setFrom(_from);
+    setTo(_to);
+    setAdditionalItems(additionalElements);
+  }, []);
 
   return (
     <Container
@@ -63,9 +85,15 @@ function Gallery({
       reverse={reverse}
     >
       <div className="content">
-        {_items.map((item, i) => (
-          <Panel key={i} width={panelWidth} height={panelHeight} {...item} />
+        {reverse ? additionalItems : null}
+
+        {children.map((ch, i) => (
+          <div key={i} ref={(el) => (refs.current[i] = el!)}>
+            {ch}
+          </div>
         ))}
+
+        {reverse ? null : additionalItems}
       </div>
     </Container>
   );
@@ -107,7 +135,6 @@ const Container = styled.div.attrs(({ width, height }: SProps) => ({
   },
 }))<SProps>`
   overflow: hidden;
-
   .content {
     display: flex;
     left: 0;

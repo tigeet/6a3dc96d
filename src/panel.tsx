@@ -1,7 +1,8 @@
 import { IPanel } from "App";
 import styled from "styled-components";
 
-function Panel<T extends IPanel & { width: number; height: number }>(props: T) {
+// function Panel<T extends IPanel & { width: number; height: number }>(props: T) {
+function Panel(props: IPanel) {
   return (
     <CPanel {...props}>
       <h6 className="title">{props.title}</h6>
@@ -12,7 +13,8 @@ function Panel<T extends IPanel & { width: number; height: number }>(props: T) {
 
 export default Panel;
 
-interface SProps extends IPanel {
+interface SProps {
+  url: string;
   width: number;
   height: number;
 }
@@ -27,6 +29,7 @@ const CPanel = styled.div.attrs<SProps>((props: SProps) => ({
   display: flex;
   background-size: cover;
   flex-direction: column;
+  border-radius: 4px;
   flex-shrink: 0;
   padding: 36px;
   justify-content: space-between;
