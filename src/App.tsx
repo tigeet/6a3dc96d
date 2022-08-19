@@ -7,13 +7,18 @@ interface IPanel {
   subtitle: string;
   width: number;
   height: number;
+  errorScreen?: JSX.Element;
 }
 
 function App() {
   return (
-    <Gallery speed={6} reverse gap={8}>
-      {items.slice(0, 6).map((item) => (
-        <Panel {...item} />
+    <Gallery
+      speed={6}
+      //reverse
+      // gap={8}
+    >
+      {items.slice(0, 7).map((item) => (
+        <Panel key={item.id} {...item} />
       ))}
     </Gallery>
   );

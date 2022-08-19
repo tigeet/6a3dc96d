@@ -29,7 +29,7 @@ const CPanel = styled.div.attrs<SProps>((props: SProps) => ({
   display: flex;
   background-size: cover;
   flex-direction: column;
-  border-radius: 4px;
+  /* border-radius: 4px; */
   flex-shrink: 0;
   padding: 36px;
   justify-content: space-between;

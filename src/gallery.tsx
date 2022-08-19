@@ -8,7 +8,7 @@ interface CProps {
   height?: number;
   className?: string;
   reverse?: boolean;
-  children: JSX.Element[];
+  children: JSX.Element | JSX.Element[];
 }
 
 function Gallery({
@@ -20,18 +20,28 @@ function Gallery({
   reverse,
   children,
 }: CProps) {
+  const _children: JSX.Element[] = !Array.isArray(children)
+    ? [children]
+    : children;
+
   const [duration, setDuration] = useState<number>(0);
   const [from, setFrom] = useState<number>(0);
   const [to, setTo] = useState<number>(0);
   const [additionalItems, setAdditionalItems] =
-    useState<JSX.Element[]>(children);
-  const refs = useRef<HTMLDivElement[]>(Array(children.length));
+    useState<JSX.Element[]>(_children);
+  const refs = useRef<HTMLDivElement[]>(Array(_children.length));
   const screenWidth = width ?? window.innerWidth;
+  const [isValid, setIsValid] = useState<boolean>(true);
+
   useEffect(() => {
     let _from = 0;
     let _to = 0;
     const additionalElements = [];
-
+    const _width = refs.current.reduce((w, el) => w + el.clientWidth + gap, 0);
+    if (_width < screenWidth) {
+      setIsValid(false);
+      return;
+    }
     if (reverse) {
       let addW = 0;
       for (
@@ -39,15 +49,12 @@ function Gallery({
         w < screenWidth;
         w += refs.current[i].clientWidth + gap, --i
       ) {
-        additionalElements.push(children[i]);
+        additionalElements.push(_children[i]);
         addW += refs.current[i].clientWidth + gap;
       }
       additionalElements.reverse();
 
-      const _width =
-        refs.current.reduce((w, el) => w + el.clientWidth + gap, 0) + addW;
-
-      _from = -_width + screenWidth;
+      _from = -_width - addW + screenWidth;
       _to = -addW + screenWidth;
     } else {
       for (
@@ -55,13 +62,8 @@ function Gallery({
         w < screenWidth;
         w += refs.current[i].clientWidth + gap, i++
       ) {
-        additionalElements.push(children[i]);
+        additionalElements.push(_children[i]);
       }
-
-      const _width = refs.current.reduce(
-        (w, el) => w + el.clientWidth + gap,
-        0
-      );
       _from = 0;
       _to = -_width;
     }
@@ -74,28 +76,34 @@ function Gallery({
   }, []);
 
   return (
-    <Container
-      className={className}
-      from={from}
-      to={to}
-      duration={duration}
-      gap={gap}
-      width={width}
-      height={height}
-      reverse={reverse}
-    >
-      <div className="content">
-        {reverse ? additionalItems : null}
+    <>
+      {isValid ? (
+        <Container
+          className={className}
+          from={from}
+          to={to}
+          duration={duration}
+          gap={gap}
+          width={width}
+          height={height}
+          reverse={reverse}
+        >
+          <div className="content">
+            {reverse ? additionalItems : null}
 
-        {children.map((ch, i) => (
-          <div key={i} ref={(el) => (refs.current[i] = el!)}>
-            {ch}
+            {_children.map((ch, i) => (
+              <div key={i} ref={(el) => (refs.current[i] = el!)}>
+                {ch}
+              </div>
+            ))}
+
+            {reverse ? null : additionalItems}
           </div>
-        ))}
-
-        {reverse ? null : additionalItems}
-      </div>
-    </Container>
+        </Container>
+      ) : (
+        "Not enough elements"
+      )}
+    </>
   );
 }
 
