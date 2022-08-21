@@ -11,7 +11,7 @@ interface CProps {
   children: JSX.Element | JSX.Element[];
 }
 
-function Gallery({
+function Row({
   speed: time,
   gap = 0,
   height,
@@ -107,7 +107,7 @@ function Gallery({
   );
 }
 
-export default Gallery;
+export default Row;
 
 const slide = (from: number, to: number) => keyframes`
   0% {

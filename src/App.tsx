@@ -1,5 +1,6 @@
-import Gallery from "gallery";
+import Row from "row";
 import Panel from "panel";
+
 interface IPanel {
   id: string;
   url: string;
@@ -7,12 +8,11 @@ interface IPanel {
   subtitle: string;
   width: number;
   height: number;
-  errorScreen?: JSX.Element;
 }
 
 function App() {
   return (
-    <Gallery
+    <Row
       speed={6}
       //reverse
       // gap={8}
@@ -20,11 +20,12 @@ function App() {
       {items.slice(0, 7).map((item) => (
         <Panel key={item.id} {...item} />
       ))}
-    </Gallery>
+    </Row>
   );
 }
 
 export default App;
+
 export type { IPanel };
 
 const items: IPanel[] = [
