@@ -14,4 +14,4 @@
 
 ### Preview
 
-![](https://github.com/tigeet/6a3dc96d/preview.gif)
+![](https://github.com/tigeet/6a3dc96d/blob/main/preview.gif)
