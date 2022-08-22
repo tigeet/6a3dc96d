@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
@@ -151,5 +152,9 @@ const Container = styled.div.attrs(({ width, height }: SProps) => ({
     animation: ${({ from, to, reverse = false }: SProps) =>
         reverse ? slideReverse(from, to) : slide(from, to)}
       ${(props) => props.duration}s linear infinite;
+
+    & > * {
+      flex-shrink: 0;
+    }
   }
 `;
